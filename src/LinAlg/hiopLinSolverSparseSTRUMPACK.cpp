@@ -280,13 +280,18 @@ bool hiopLinSolverSymSparseSTRUMPACK::solve(hiopVector& x_)
   double* dx = x->local_data();
   double* drhs = rhs->local_data();
 
-  spss.solve(drhs, dx);
+  strumpack::ReturnCode retval = spss.solve(drhs, dx);
 
   nlp_->runStats.linsolv.tmTriuSolves.stop();
 
   delete rhs;
   rhs = nullptr;
-  return 1;
+
+  if(strumpack::ReturnCode::SUCCESS != retval) {
+    nlp_->log->printf(hovWarning, "hiopLinSolverSymSparseSTRUMPACK: STRUMPACK solve returned %d\n", (int)retval);
+    return false;
+  }
+  return true;
 }
 
 hiopLinSolverNonSymSparseSTRUMPACK::hiopLinSolverNonSymSparseSTRUMPACK(const int& n, const int& nnz, hiopNlpFormulation* nlp)
@@ -405,12 +410,17 @@ bool hiopLinSolverNonSymSparseSTRUMPACK::solve(hiopVector& x_)
   double* dx = x->local_data();
   double* drhs = rhs->local_data();
 
-  spss.solve(drhs, dx);
+  strumpack::ReturnCode retval = spss.solve(drhs, dx);
 
   nlp_->runStats.linsolv.tmTriuSolves.stop();
   delete rhs;
   rhs = nullptr;
-  return 1;
+
+  if(strumpack::ReturnCode::SUCCESS != retval) {
+    nlp_->log->printf(hovWarning, "hiopLinSolverNonSymSparseSTRUMPACK: STRUMPACK solve returned %d\n", (int)retval);
+    return false;
+  }
+  return true;
 }
 
 }  // end namespace hiop
